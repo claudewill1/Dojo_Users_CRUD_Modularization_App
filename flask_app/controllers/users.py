@@ -5,6 +5,13 @@ from flask_app.models.user import User
 @app.route("/")
 def index():
     return redirect('/users')
+
+@app.route('/users/<int:id>')
+def users(id):
+    data = {
+        "id": id
+    }
+    return render_template("show_user.html",user=User.getOne(data))
 # -------------Add user landing page
 @app.route('/users/new')
 def new():
@@ -14,9 +21,10 @@ def new():
 def create_user():
     print(request.form)
     data = request.form
-    User.save(data)
+    user = User.save(data)
     # Don't forget to redirect after saving to the database
-    return redirect("/users")
+    session['id'] = user
+    return redirect(f"/users/{user}")
 
 #-------Route to update user page
 @app.route("/users/show/<int:id>")
@@ -42,8 +50,9 @@ def update(id):
         "last_name": request.form["last_name"],
         "email": request.form["email"]
     }
-    User.update(data)
-    return redirect('/users')
+    user = User.update(data)
+    
+    return redirect(f"/users/{id}")
 
 #---- Hidden delete route (only used to delete a record from table)
 @app.route('/users/delete/<int:id>')
